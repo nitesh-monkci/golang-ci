@@ -1,10 +1,37 @@
-# Go Basics: Pointers and Structs
+# Go Basics
 
-This document explains two core Go concepts with examples:
+A structured reference guide to core Go concepts with examples.
 
-1. Why Go?
-2. Pointers
-3. Structs
+## Table of Contents
+
+- [1. Why Go?](#1-why-go)
+- [2. Pointers](#2-pointers)
+  - [Pointer Example](#pointer-example)
+  - [Pointer Operators](#pointer-operators)
+  - [Pass by Value vs Pointer](#pass-by-value-vs-pointer)
+- [3. Structs](#3-structs)
+  - [Basic Struct Example](#basic-struct-example)
+  - [Struct Embedding (Composition)](#struct-embedding-composition)
+  - [Methods on Structs](#methods-on-structs)
+  - [Mutable Methods on Structs](#mutable-methods-on-structs)
+  - [Constructor Function for Structs](#contructor-function-for-structs)
+  - [Struct Embedding vs Inheritance](#struct-embedding-vs-inheritance)
+- [4. Interfaces](#4-interfaces)
+  - [Empty Interface (any)](#empty-interface-any)
+  - [Type Assertions and Type Switches](#type-assertions-and-type-switches)
+  - [Interface Embedding](#interface-embedding)
+  - [Interface Limitations and Dynamic Types](#interface-limitations-and-dynamic-types)
+  - [Generics Concept](#generics-concept)
+- [5. Sync and Async in Go](#5-sync-and-async-in-go)
+  - [Synchronous Execution](#synchronous-execution)
+  - [Asynchronous Execution with Goroutines](#asynchronous-execution-with-goroutines)
+  - [Coordination with sync.WaitGroup](#coordination-with-syncwaitgroup)
+- [6. Goroutines and Channels](#6-goroutines-and-channels)
+- [7. Defer, Panic, and Recover](#7-defer-panic-and-recover)
+- [8. Java Thread vs. Go Goroutine](#8-java-thread-vs-go-goroutine)
+- [9. sync.Mutex (Mutual Exclusion)](#9-syncmutex-mutual-exclusion)
+
+---
 
 ## 1. Why Go?
 Go is a statically typed, compiled language designed for simplicity, performance, and concurrency. It’s great for building scalable web servers, microservices, and command-line tools.
