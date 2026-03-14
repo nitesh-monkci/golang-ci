@@ -1,26 +1,26 @@
-package main
+// package main
 
-import (
-	"log"
-	"net/http"
+// import (
+// 	"log"
+// 	"net/http"
 
-	"github.com/gin-gonic/gin"
-)
+// 	"github.com/gin-gonic/gin"
+// )
 
-func main() {
-	r := gin.Default()
+// func main() {
+// 	r := gin.Default()
 
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "pong",
-		})
-	})
+// 	r.GET("/ping", func(c *gin.Context) {
+// 		c.JSON(http.StatusOK, gin.H{
+// 			"message": "pong",
+// 		})
+// 	})
 
-	// Wrap r.Run in a log.Fatal to catch and report startup errors
-	if err := r.Run(":8080"); err != nil {
-		log.Fatalf("Failed to run server: %v", err)
-	}
-}
+// 	// Wrap r.Run in a log.Fatal to catch and report startup errors
+// 	if err := r.Run(":8080"); err != nil {
+// 		log.Fatalf("Failed to run server: %v", err)
+// 	}
+// }
 
 // package main
 
