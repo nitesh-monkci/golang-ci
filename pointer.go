@@ -2,11 +2,11 @@
 
 // When a function receives a value type as an argument, it creates a copy of that data. This means if the original data is large, we now have two versions (imagine if one is about 200GB, that’d be a lot to work with) of it in memory leading to increased memory usage and potential performance issues.
 
-package main
+// package main
 
-import (
-	"fmt"
-)
+// import (
+// 	"fmt"
+// )
 
 // func main() {
 // 	var x int = 10
@@ -23,34 +23,251 @@ import (
 // 	fmt.Printf("New address of x: %p\n", &x) // Output: New address of x: 0xc0000140a8 (same as address of p)
 // }
 
-type User struct {
-	Username string
-	Email    string
+// type User struct {
+// 	Username string
+// 	Email    string
+// }
+
+// func (u User) GetEmail() string {
+// 	return u.Email
+// }
+
+// func (u *User) SetEmail(newEmail string) {
+// 	u.Email = newEmail
+// }
+
+// type Admin struct {
+// 	User  // embedded struct
+// 	Level int
+// }
+
+// func main() {
+// 	a := Admin{
+// 		User:  User{Username: "admin01", Email: "admin@example.com"},
+// 		Level: 10,
+// 	}
+
+// 	fmt.Println(a.Username)   // promoted field from embedded User
+// 	fmt.Println(a.Email)      // promoted field from embedded User
+// 	fmt.Println(a.GetEmail()) // promoted method from embedded User
+// 	a.SetEmail("newemail@example.com")
+// 	fmt.Println(a.Email) // promoted field from embedded User
+// 	fmt.Println(a.Level) // field from Admin struct
+// }
+
+// package main
+
+// import (
+// 	"fmt"
+// 	"sync"
+// )
+
+// func worker(id int, wg *sync.WaitGroup) {
+// 	defer wg.Done() // signal completion
+// 	fmt.Printf("Worker %d starting\n", id)
+// 	// Simulate work
+// 	fmt.Printf("Worker %d done\n", id)
+// }
+
+// func main() {
+// 	var wg sync.WaitGroup
+// 	numWorkers := 3
+
+// 	wg.Add(numWorkers) // set the number of goroutines to wait for
+
+// 	for i := 1; i <= numWorkers; i++ {
+// 		go worker(i, &wg) // start worker goroutine
+// 	}
+
+// 	wg.Wait() // wait for all workers to finish
+// 	fmt.Println("All workers completed")
+// }
+
+// package main
+
+// import (
+// 	"fmt"
+// 	"time"
+// )
+
+// func worker(id int, ch chan string) {
+// 	time.Sleep(time.Second)                 // Simulate work
+// 	ch <- fmt.Sprintf("Worker %d done", id) // Send result to channel
+// }
+
+// func main() {
+// 	ch := make(chan string) // Create a channel
+
+// 	for i := 1; i <= 3; i++ {
+// 		go worker(i, ch) // Start worker goroutines
+// 	}
+
+// 	for i := 1; i <= 3; i++ {
+// 		msg := <-ch // Receive messages from channel
+// 		fmt.Println(msg)
+// 	}
+// }
+
+// Goroutine practice
+// package main
+
+// import (
+// 	"fmt"
+// 	"time"
+// )
+
+// // Add wg.Done()
+// // func worker(id int, wg *sync.WaitGroup) {
+// // 	fmt.Printf("Worker %d starting\n", id)
+// // 	time.Sleep(time.Second) // Simulate work
+// // 	fmt.Printf("Worker %d done\n", id)
+// // 	wg.Done() // Signal completion
+// // }
+
+// func greet(phrase string, doneChan chan bool) {
+// 	fmt.Println(phrase)
+// 	doneChan <- true // Signal that the operation is done
+// }
+
+// func slowGreet(phrase string, doneChan chan bool) {
+// 	time.Sleep(3 * time.Second) // Simulate a slow operation
+// 	fmt.Println(phrase)
+// 	doneChan <- true // Signal that the operation is done
+// }
+
+// func main() {
+// 	// var wg sync.WaitGroup
+// 	// wg.Add(3) // We have 3 workers to wait for
+// 	// for i := 1; i <= 3; i++ {
+// 	// 	go worker(i, &wg) // Start worker goroutine
+// 	// }
+
+// 	// wg.Wait() // Wait for all workers to finish
+// 	// fmt.Println("All workers completed")
+
+// 	// ==========================
+// 	// ch := make(chan bool)
+
+// 	// go greet("Hey!", ch)
+// 	// go slowGreet("Hello, World!", ch)
+// 	// go greet("Welcome to Go!", ch)
+
+// 	// // Wait for all greetings to complete
+// 	// for i := 0; i < 3; i++ {
+// 	// 	<-ch // Wait for a signal from each goroutine
+// 	// }
+
+// 	// fmt.Println("All greetings completed")
+
+// 	// ==========================
+// 	doneChans := make([]chan bool, 3)
+// 	for i := 0; i < 3; i++ {
+// 		doneChans[i] = make(chan bool)
+// 	}
+
+// 	go greet("Hey!", doneChans[0])
+// 	go slowGreet("Hello, World!", doneChans[1])
+// 	go greet("Welcome to Go!", doneChans[2])
+
+// 	// Wait for all greetings to complete
+// 	// for i := 0; i < 3; i++ {
+// 	// 	<-doneChans[i] // Wait for a signal from each goroutine
+// 	// }
+
+// 	for _, doneChan := range doneChans {
+// 		<-doneChan // Wait for a signal from each goroutine
+// 	}
+
+// 	fmt.Println("All greetings completed")
+// }
+
+// package main
+
+// import "fmt"
+
+// func riskyFunction() {
+// 	defer func() {
+// 		if r := recover(); r != nil {
+// 			fmt.Println("Recovered from panic:", r)
+// 		}
+// 	}()
+
+// 	panic("Something went wrong!")
+// }
+// func main() {
+// 	riskyFunction()
+// 	fmt.Println("Program continues after recovery")
+// }
+
+// package main
+
+// import (
+// 	"fmt"
+// 	"sync"
+// 	"time"
+// )
+
+// type Counter struct {
+// 	mu    sync.Mutex
+// 	value int
+// }
+
+// func (c *Counter) Increment() {
+// 	c.mu.Lock()         // Acquire the lock
+// 	defer c.mu.Unlock() // Release the lock when done
+// 	c.value++
+
+// }
+
+// func main() {
+// 	c := &Counter{}
+
+// 	for i := 0; i < 1000; i++ {
+// 		go c.Increment()
+
+// 	}
+
+// 	time.Sleep(1 * time.Second)                  // Wait for all goroutines to finish
+// 	fmt.Println("Final Counter Value:", c.value) // Should print 1000
+// }
+
+package main
+
+import (
+	"fmt"
+	"sync"
+)
+
+type post struct {
+	views int
+	mu    sync.Mutex
 }
 
-func (u User) GetEmail() string {
-	return u.Email
+//	func (p *post) incrementViews(wg *sync.WaitGroup) {
+//		defer wg.Done()
+//		p.mu.Lock()
+//		p.views += 1
+//		defer p.mu.Unlock()
+//	}
+func (p *post) incrementViews(wg *sync.WaitGroup) {
+	defer func() {
+		wg.Done()
+		p.mu.Unlock()
+	}()
+	p.mu.Lock()
+	p.views += 1
 }
 
-func (u *User) SetEmail(newEmail string) {
-	u.Email = newEmail
-}
-
-type Admin struct {
-	User  // embedded struct
-	Level int
-}
+// Request will come concurrently
 
 func main() {
-	a := Admin{
-		User:  User{Username: "admin01", Email: "admin@example.com"},
-		Level: 10,
-	}
+	var wg sync.WaitGroup
+	myPost := post{views: 0}
 
-	fmt.Println(a.Username)   // promoted field from embedded User
-	fmt.Println(a.Email)      // promoted field from embedded User
-	fmt.Println(a.GetEmail()) // promoted method from embedded User
-	a.SetEmail("newemail@example.com")
-	fmt.Println(a.Email) // promoted field from embedded User
-	fmt.Println(a.Level) // field from Admin struct
+	for i := 0; i < 1000; i++ {
+		wg.Add(1)
+		go myPost.incrementViews(&wg)
+	}
+	wg.Wait()                 // Wait for all increments to finish
+	fmt.Println(myPost.views) // Output: random
 }

@@ -2,10 +2,20 @@
 
 This document explains two core Go concepts with examples:
 
-1. Pointers
-2. Structs
+1. Why Go?
+2. Pointers
+3. Structs
 
-## 1. Pointers
+## 1. Why Go?
+Go is a statically typed, compiled language designed for simplicity, performance, and concurrency. It’s great for building scalable web servers, microservices, and command-line tools.
+- Fast compilation: Go compiles quickly, making development faster.
+- Concurrency: Go has built-in support for concurrent programming with goroutines and channels. Helps in handling multiple tasks simultaneously.
+- Static Typing: Go’s static type system helps catch errors at compile time, improving code reliability.
+- Simplicity: Go has a clean syntax and a small standard library, making it easy to learn and use.
+- Deployment: Go compiles to a single binary, simplifying deployment without worrying about dependencies.
+- Concurrency in Go is Cheap and Easy.
+
+## 2. Pointers
 
 By default, Go uses pass-by-value. That means when you pass a variable to a function, Go creates a copy.
 
@@ -58,7 +68,7 @@ func UpdateNamePointer(u *User) {
 }
 ```
 
-## 2. Structs
+## 3. Structs
 
 Structs are typed collections of fields. They help model real-world entities by grouping related data.
 
@@ -217,7 +227,7 @@ func main() {
 ```
 
 
-## 3. Interfaces
+## 4. Interfaces
 Interfaces define a set of method signatures. Any type that implements those methods satisfies the interface, allowing for polymorphism. It doesn’t contain data; it only defines behavior.
 
 Benefits of interfaces:
@@ -364,5 +374,205 @@ func add[T any](a, b T) T {
 
 func add[T int | float64 | string](a, b T) T {
     return a + b
+}
+```
+
+## 5. Sync and Async in Go
+Go handles "sync" (sequential, blocking execution) and "async" (concurrent via goroutines/channels).
+Goroutines provide lightweight concurrency while `sync` package coordinates them safely.
+
+### Synchronous Execution
+Operations run one-by-one; each blocks until complete. Simple but slow for I/O or parallelizable work.
+
+### Asynchronous Execution with Goroutines
+Goroutines are functions that run concurrently. They are lightweight and managed by the Go runtime. You can start a goroutine with the `go` keyword. They run concurrently without blocking main.
+
+```go
+go func() {
+    fmt.Println("This runs in a goroutine")
+}()
+```
+
+- Goroutines overlap execution; main needs time.Sleep or `sync` primitives to wait.
+
+### Coordination with sync.WaitGroup
+- Main thread does not wait for goroutines to finish by default. Use `sync.WaitGroup` to coordinate.
+WaitGroup tracks completion; Add() increments counter, Done() decrements, Wait() blocks until zero.
+Add(4): set the no. of goroutines to wait for.
+Wait(): blocks until all goroutines call Done(). OR until waitgroup counter is zero.
+Done(): decrements the waitgroup counter by 1, called by goroutine when it finishes its work.
+
+```go
+package main
+
+import (
+    "fmt"
+    "sync"
+)
+
+func worker(id int, wg *sync.WaitGroup) {
+    defer wg.Done() // signal completion
+    fmt.Printf("Worker %d starting\n", id)
+    // Simulate work
+    fmt.Printf("Worker %d done\n", id)
+}
+
+func main() {
+    var wg sync.WaitGroup
+    numWorkers := 3
+
+    wg.Add(numWorkers) // set the number of goroutines to wait for
+
+    for i := 1; i <= numWorkers; i++ {
+        go worker(i, &wg) // start worker goroutine
+    }
+
+    wg.Wait() // wait for all workers to finish
+    fmt.Println("All workers completed")
+}
+```
+
+## 6. Goroutines and Channels
+Goroutines are lightweight threads managed by the Go runtime. They allow you to run functions concurrently without blocking the main thread. 
+Channels are used to communicate between goroutines safely, allowing you to send and receive data without explicit locks.
+
+```go
+package main
+
+import (
+    "fmt"
+    "time"
+)
+
+func worker(id int, ch chan string) {
+    time.Sleep(time.Second) // Simulate work
+    ch <- fmt.Sprintf("Worker %d done", id) // Send result to channel
+}
+
+func main() {
+    ch := make(chan string) // Create a channel
+
+    for i := 1; i <= 3; i++ {
+        go worker(i, ch) // Start worker goroutines
+    }
+
+    for i := 1; i <= 3; i++ {
+        msg := <-ch // Receive messages from channel
+        fmt.Println(msg)
+    }
+}
+```
+
+## 7. Defer, Panic, and Recover
+- `defer`: schedules a function to run after the current function completes, useful for cleanup. E.g., closing files, releasing locks, etc.
+
+- `panic`: stops normal execution and begins panicking, used for unrecoverable errors. E.g., when a critical error occurs that cannot be handled gracefully.
+- `recover`: allows you to regain control of a panicking goroutine, used to handle panics gracefully. E.g., to prevent a program from crashing and to log the error instead.
+
+```go
+package main
+
+import "fmt"
+func riskyFunction() {
+    defer func() {
+        if r := recover(); r != nil {
+            fmt.Println("Recovered from panic:", r)
+        }
+    }()
+
+    panic("Something went wrong!")
+}
+func main() {
+    riskyFunction()
+    fmt.Println("Program continues after recovery")
+}
+```
+
+## 8. Java Thread vs. Go Goroutine
+
+| Feature    | Java Thread (OS Thread)              | Go Goroutine (Green Thread)          |
+|------------|--------------------------------------|--------------------------------------|
+| Memory     | Starts at ~1MB stack size.           | Starts at ~2KB stack size.           |
+| Creation   | Expensive (System call to OS).       | Very cheap (Managed by Go runtime).  |
+| Limit      | A few thousand per CPU.              | Millions per CPU.                    |
+| Switching  | Managed by OS (Context switch is slow). | Managed by Go Scheduler (Fast).   |
+
+
+## 9. sync.Mutex (Mutual Exclusion)
+Used to prevent Race Conditions (When multiple goroutines access the same resource concurrently).
+A `sync.Mutex` is a mutual exclusion lock that protects shared resources from concurrent access. It ensures that only one goroutine can access a critical section of code at a time.
+
+- NOTE: ISSUE IN THE EXAMPLE BELOW: When multiple goroutines increment the `views` field of the `post` struct concurrently, it can lead to a race condition, resulting in an incorrect final count of views. This is because the increment operation (`p.views += 1`) is not atomic, and multiple goroutines can read and write to `views` simultaneously, causing some increments to be lost.
+```go
+package main
+
+import (
+	"fmt"
+	"sync"
+)
+
+type post struct {
+	views int
+}
+
+func (p *post) incrementViews(wg *sync.WaitGroup) {
+	defer wg.Done()
+	p.views += 1
+}
+
+// Request will come concurrently
+
+func main() {
+	var wg sync.WaitGroup
+	myPost := post{views: 0}
+
+	for i := 0; i < 1000; i++ {
+		wg.Add(1)
+		go myPost.incrementViews(&wg)
+	}
+	wg.Wait()                 // Wait for all increments to finish
+	fmt.Println(myPost.views) // Output: random
+}
+```
+
+- FIXED CODE
+```go
+package main
+
+import (
+	"fmt"
+	"sync"
+)
+
+type post struct {
+	views int
+	mu    sync.Mutex
+}
+
+// func (p *post) incrementViews(wg *sync.WaitGroup) {
+// 	defer wg.Done()
+// 	p.mu.Lock()
+// 	p.views += 1
+// 	defer p.mu.Unlock()
+// }
+func (p *post) incrementViews(wg *sync.WaitGroup) {
+	defer func() {
+		wg.Done()
+		p.mu.Unlock()
+	}()
+	p.mu.Lock()
+	p.views += 1
+}
+
+func main() {
+	var wg sync.WaitGroup
+	myPost := post{views: 0}
+
+	for i := 0; i < 1000; i++ {
+		wg.Add(1)
+		go myPost.incrementViews(&wg)
+	}
+	wg.Wait()                 // Wait for all increments to finish
+	fmt.Println(myPost.views) // Output: 1000
 }
 ```
